@@ -42,8 +42,8 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Image.asset(
             'assets/favicon.png',
             fit: BoxFit.contain,
-            width: 400,
-            height: 400,
+            width: 300,
+            height: 300,
           ),
           
         ),

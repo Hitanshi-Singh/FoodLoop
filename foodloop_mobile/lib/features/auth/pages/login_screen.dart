@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodloop_mobile/core/theme/app_pallete.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String message = '';
   bool isLoading = false;
   bool _obscurePassword = true;
+  Map<String, dynamic> _response = {};
 
   @override
   void dispose() {
@@ -29,41 +31,37 @@ class _LoginScreenState extends State<LoginScreen> {
         isLoading = true;
         message = '';
       });
-
       try {
-        final response = await AuthService.login(
+        _response = await AuthService.login(
           emailController.text.trim(),
           passwordController.text,
         );
 
-        if (response['token'] != null) {
+        if (_response['token'] != null) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Login successful!'),
-                backgroundColor: AppPallete.gradient1,
+              const SnackBar(
+                content: Text('Login successful!'),
+                backgroundColor: Color.fromARGB(255, 22, 163, 74),
               ),
             );
             Navigator.pushReplacementNamed(context, '/home');
           }
         } else {
           setState(() {
-            message = response['error'] ?? 'Login failed. Please try again.';
+            message = _response['error'] ?? 'Login failed. Please try again.';
+            print(message);
           });
         }
       } catch (e) {
         setState(() {
           message = 'An error occurred. Please try again.';
+          print(e.toString());
         });
       } finally {
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-            if(message != 'Invalid credentials') {
-            Navigator.pushNamed(context, '/home');
-            }
-          });
-        }
+        setState(() {
+          isLoading = false;
+        });
       }
     }
   }
@@ -86,9 +84,9 @@ class _LoginScreenState extends State<LoginScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    const SizedBox(height: 10),
+                    Image.asset('assets/favicon.png', height: 180, width: 180),
                     const SizedBox(height: 30),
-                    Image.asset('assets/favicon.png', height: 200, width: 200),
-                    const SizedBox(height: 40),
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -134,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   _obscurePassword
                                       ? Icons.visibility_off
                                       : Icons.visibility,
-                                  color: AppPallete.gradient1,
+                                  color: Color.fromARGB(255, 22, 163, 74),
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -143,23 +141,28 @@ class _LoginScreenState extends State<LoginScreen> {
                                 },
                               ),
                             ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/forgot-password',
-                                  );
-                                },
-                                child: const Text('Forgot Password?'),
-                              ),
-                            ),
+                            // Align(
+                            //   alignment: Alignment.centerRight,
+                            //   child: TextButton(
+                            //     onPressed: () {
+                            //       Navigator.pushNamed(
+                            //         context,
+                            //         '/forgot-password',
+                            //       );
+                            //     },
+                            //     child: const Text('Forgot Password?',),
+                            //   ),
+                            // ),
                             const SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: isLoading ? null : handleLogin,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppPallete.gradient1,
+                                backgroundColor: Color.fromARGB(
+                                  255,
+                                  22,
+                                  163,
+                                  74,
+                                ),
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 12,
@@ -195,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: TextStyle(
                                     color:
                                         message.contains('success')
-                                            ? AppPallete.gradient1
+                                            ? Color.fromARGB(255, 22, 163, 74)
                                             : Colors.red,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -208,7 +211,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/signup'),
+                      onPressed: () async {
+                        const url =
+                            'https://google.com'; // Replace with your actual signup URL
+                        try {
+                          await launchUrl(
+                            Uri.parse(url),
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } catch (e) {
+                          print(e.toString());
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Could not launch the signup page: $e',
+                              ),
+                            ),
+                          );
+                        }
+                      },
                       child: const Text(
                         "Don't have an account? Sign Up",
                         style: TextStyle(
@@ -241,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(prefixIcon, color: AppPallete.gradient1),
+        prefixIcon: Icon(prefixIcon, color: Color.fromARGB(255, 22, 163, 74)),
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -253,7 +274,10 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppPallete.gradient1, width: 2),
+          borderSide: BorderSide(
+            color: Color.fromARGB(255, 22, 163, 74),
+            width: 2,
+          ),
         ),
         filled: true,
         fillColor: Colors.grey.shade100,

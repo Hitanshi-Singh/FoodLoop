@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:foodloop_mobile/core/theme/theme.dart';
 import 'package:foodloop_mobile/core/utils/splash_screent.dart';
 import 'package:foodloop_mobile/features/auth/pages/login_screen.dart';
-import 'package:foodloop_mobile/features/auth/pages/sign_up.dart';
 import 'package:foodloop_mobile/features/home/pages/home.dart';
 
 void main() {
@@ -22,7 +21,6 @@ class MyApp extends StatelessWidget {
     routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
         '/home': (context) => const Home(),
       },
     );

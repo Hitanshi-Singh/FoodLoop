@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
+import { JWT } from "google-auth-library";
+import serviceAccountCredentials from "../../../service-account-credentials";
 const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const iconRef = useRef(null);
@@ -8,7 +10,39 @@ const ChatbotWidget = () => {
     { from: "bot", text: "Hello! 👋 How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
+  const [authToken, setAuthToken] = useState(null);
+  const [tokenExpiry, setTokenExpiry] = useState(0);
 
+  // Get a fresh token if needed
+  const getAccessToken = async () => {
+    // Check if token is still valid (with 5 min buffer)
+    const now = Date.now();
+    if (authToken && tokenExpiry > now + 300000) {
+      return authToken;
+    }
+
+    try {
+      // Create a JWT client using the service account
+      const client = new JWT({
+        email: serviceAccountCredentials.client_email,
+        key: serviceAccountCredentials.private_key,
+        scopes: ['https://www.googleapis.com/auth/dialogflow'],
+      });
+
+      // Get an access token
+      const token = await client.getAccessToken();
+      
+      // Store token and its expiration time
+      setAuthToken(token.token);
+      // Set expiry (token typically valid for 1 hour)
+      setTokenExpiry(now + 3600000); 
+      
+      return token.token;
+    } catch (error) {
+      console.error("Error getting access token:", error);
+      return null;
+    }
+  };
   useEffect(() => {
     if (isOpen) {
       gsap.fromTo(
@@ -34,18 +68,23 @@ const ChatbotWidget = () => {
     setMessages((prev) => [...prev, userMessage]);
 
     const sessionId = localStorage.getItem("df_session_id") || (() => {
-      const id = crypto.randomUUID(); // or uuidv4()
-      localStorage.setItem("df_session_id", id);
+      const id = window.crypto.randomUUID();
+localStorage.setItem("df_session_id", id);
       return id;
     })();
 
     try {
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error("Failed to obtain authentication token");
+      }
+
       const res = await fetch(
         `https://dialogflow.googleapis.com/v2/projects/YOUR_PROJECT_ID/agent/sessions/${sessionId}:detectIntent`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer YOUR_SERVICE_ACCOUNT_TOKEN`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

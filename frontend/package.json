@@ -31,6 +31,7 @@
     "leaflet.heat": "^0.2.0",
     "lucide-react": "^0.487.0",
     "motion": "^12.7.3",
+    "process": "^0.11.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-globe.gl": "^2.33.2",
@@ -46,7 +47,8 @@
     "styled-components": "^6.1.17",
     "tailwind-merge": "^3.2.0",
     "three": "^0.175.0",
-    "three-globe": "^2.42.4"
+    "three-globe": "^2.42.4",
+    "vite-plugin-node-polyfills": "^0.23.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
